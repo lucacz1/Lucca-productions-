@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iPhone Simulator</title>
+<style>
+:root{--w:393px;--h:852px;--r:55px}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;user-select:none}
+body{min-height:100vh;display:grid;place-items:center;background:#0b0b10;font-family:-apple-system,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#fff}
+.frame{width:calc(var(--w) + 24px);height:calc(var(--h) + 24px);border-radius:calc(var(--r) + 12px);background:#1b1b1f;padding:12px;box-shadow:0 0 0 2px #444,0 30px 80px #000a;position:relative;transform-origin:top center}
+.screen{width:var(--w);height:var(--h);border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(160deg,#1e3c72,#2a5298 40%,#e96443);transition:background .4s}
+body.dark .screen{background:linear-gradient(160deg,#0f0c29,#302b63 55%,#24243e)}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
+.status{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:6px 34px 0;font-weight:600;font-size:16px;z-index:40}
+.status .r{display:flex;gap:6px;align-items:center}
+.bat{width:26px;height:12px;border:1.5px solid #fff9;border-radius:4px;padding:1px;position:relative}
+.bat i{display:block;height:100%;width:75%;background:#fff;border-radius:2px}
+.view{position:absolute;inset:0;transition:transform .35s cubic-bezier(.3,.8,.3,1),opacity .35s}
+/* lock */
+#lock{z-index:30;text-align:center;padding-top:110px;background:inherit}
+#lock .date{font-size:20px;font-weight:500;opacity:.9}
+#lock .time{font-size:92px;font-weight:600;letter-spacing:-2px;line-height:1.05}
+#lock .hint{position:absolute;bottom:34px;width:100%;font-size:14px;opacity:.8}
+#lock.up{transform:translateY(-105%)}
+/* home */
+#home{padding:70px 22px 0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 0;justify-items:center}
+.app{width:76px;text-align:center;cursor:pointer}
+.app .ic{width:62px;height:62px;border-radius:15px;display:grid;place-items:center;margin:0 auto 5px;box-shadow:0 2px 6px #0004;transition:transform .12s}
+.app:active .ic{transform:scale(.88)}
+.app span{font-size:11.5px;text-shadow:0 1px 3px #0008}
+.ic svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dock{position:absolute;bottom:22px;left:14px;right:14px;height:92px;border-radius:34px;background:#fff3;backdrop-filter:blur(20px);display:flex;justify-content:space-around;align-items:center}
+.dock .app span{display:none}.dock .app .ic{margin:0}
+.homebar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:140px;height:5px;border-radius:3px;background:#fff;z-index:60;cursor:pointer}
+/* app window */
+#appwin{z-index:20;background:#f2f2f7;color:#000;transform:scale(.3);opacity:0;pointer-events:none;border-radius:var(--r)}
+#appwin.open{transform:none;opacity:1;pointer-events:auto}
+body.dark #appwin{background:#000;color:#fff}
+.bar{padding:58px 20px 10px;font-size:30px;font-weight:700}
+.body{padding:0 16px;height:calc(100% - 140px);overflow:auto}
+/* calc */
+.calc{background:#000;color:#fff;height:100%;padding:0 12px 40px;display:flex;flex-direction:column;justify-content:flex-end}
+.calc .out{font-size:80px;text-align:right;padding:0 10px 10px;font-weight:300;overflow:hidden}
+.calc .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.calc button{height:74px;border:0;border-radius:40px;font-size:30px;background:#333;color:#fff}
+.calc button.o{background:#ff9f0a}.calc button.f{background:#a5a5a5;color:#000}
+.calc button.z{grid-column:span 2;text-align:left;padding-left:30px}
+textarea{width:100%;height:100%;border:0;background:transparent;color:inherit;font-size:18px;outline:0;resize:none}
+.row{display:flex;justify-content:space-between;align-items:center;background:#fff;color:#000;padding:14px 16px;border-radius:12px;margin-bottom:10px}
+.tg{width:51px;height:31px;border-radius:16px;background:#ccc;position:relative;cursor:pointer}
+.tg::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{background:#34c759}.tg.on::after{left:22px}
+.big{font-size:64px;font-weight:300;text-align:center;margin-top:60px}
+.soon{text-align:center;margin-top:120px;opacity:.6;font-size:18px}
+.note{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:12px;opacity:.5}
+</style>
+</head>
+<body>
+<div class="frame" id="frame"><div class="screen" id="screen">
+  <div class="island"></div>
+  <div class="status"><span class="clk">9:41</span>
+    <span class="r"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" width="3" height="12" rx="1"/></svg><span class="bat"><i></i></span></span></div>
+
+  <div class="view" id="home"><div class="grid" id="grid"></div>
+    <div class="dock" id="dock"></div></div>
+  <div class="view" id="appwin"><div id="appc"></div></div>
+  <div class="view" id="lock"><div class="date" id="ldate"></div><div class="time clk">9:41</div>
+    <div class="hint">Deslize para cima para desbloquear</div></div>
+  <div class="homebar" id="hb" title="Início"></div>
+</div></div>
+<div class="note">Simulador visual de iPhone — não é um iOS real. Clique na barra inferior para voltar ao início.</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const P={ // ícones SVG simples e originais
+phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+msg:'<path d="M4 5h16v11H9l-5 4z"/>',
+web:'<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4 0 2-6z"/>',
+music:'<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+cam:'<path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/>',
+photo:'<circle cx="12" cy="12" r="3"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',
+note:'<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+map:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+cal:'',
+};
+const apps=[
+{id:'cal',n:'Calendário',c:'#fff'},{id:'photo',n:'Fotos',c:'#fff'},{id:'cam',n:'Câmera',c:'#8e8e93'},{id:'map',n:'Mapas',c:'#34c759'},
+{id:'clock',n:'Relógio',c:'#1c1c1e'},{id:'note',n:'Notas',c:'#ffcc00'},{id:'calc',n:'Calculadora',c:'#ff9f0a'},{id:'gear',n:'Ajustes',c:'#8e8e93'}];
+const dock=[{id:'phone',n:'Telefone',c:'#34c759'},{id:'web',n:'Safari',c:'#0a84ff'},{id:'msg',n:'Mensagens',c:'#30d158'},{id:'music',n:'Música',c:'#ff375f'}];
+function tile(a){
+  const d=new Date();let inner;
+  if(a.id==='cal') inner=`<div style="color:#ff3b30;font-size:10px;font-weight:700;line-height:1">${d.toLocaleDateString('pt-BR',{weekday:'short'}).toUpperCase().replace('.','')}</div><div style="color:#000;font-size:30px;font-weight:300;line-height:1">${d.getDate()}</div>`;
+  else if(a.id==='photo') inner=`<svg viewBox="0 0 24 24" style="stroke:#ff9500">${P.photo}</svg>`;
+  else inner=`<svg viewBox="0 0 24 24">${P[a.id]}</svg>`;
+  const bg=a.id==='clock'?'#1c1c1e':a.c;
+  return `<div class="app" data-id="${a.id}"><div class="ic" style="background:${bg}">${inner}</div><span>${a.n}</span></div>`;
+}
+$('#grid').innerHTML=apps.map(tile).join('');
+$('#dock').innerHTML=dock.map(tile).join('');
+
+// relógio
+function tick(){const d=new Date();
+  document.querySelectorAll('.clk').forEach(e=>e.textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+  $('#ldate').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  const big=$('#bigclock'); if(big) big.textContent=d.toLocaleTimeString('pt-BR');}
+setInterval(tick,1000);tick();
+
+// desbloqueio
+const lock=$('#lock');
+lock.onclick=()=>lock.classList.add('up');
+let y0=null;lock.onpointerdown=e=>y0=e.clientY;lock.onpointerup=e=>{if(y0!==null&&y0-e.clientY>40)lock.classList.add('up');y0=null};
+
+// apps
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+const titles=Object.fromEntries([...apps,...dock].map(a=>[a.id,a.n]));
+function render(id){
+  if(id==='calc')return `<div class="calc" style="margin-top:-0px"><div class="out" id="co">0</div><div class="keys" id="ck"></div></div>`;
+  const head=`<div class="bar">${titles[id]}</div>`;
+  if(id==='note')return head+`<div class="body"><textarea id="nt" placeholder="Escreva aqui...">${load('note')||''}</textarea></div>`;
+  if(id==='clock')return head+`<div class="body"><div class="big" id="bigclock"></div></div>`;
+  if(id==='gear')return head+`<div class="body"><div class="row"><span>Modo escuro</span><div class="tg ${document.body.classList.contains('dark')?'on':''}" id="tgd"></div></div></div>`;
+  if(id==='cal'){const d=new Date();return head+`<div class="body"><div class="big" style="font-size:48px">${d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}</div></div>`}
+  return head+`<div class="soon">${titles[id]} — em breve</div>`;
+}
+function openApp(id){
+  $('#appc').innerHTML=render(id);
+  if(id==='note')$('#nt').oninput=e=>save('note',e.target.value);
+  if(id==='gear')$('#tgd').onclick=e=>{document.body.classList.toggle('dark');e.target.classList.toggle('on');save('dark',document.body.classList.contains('dark')?'1':'0')};
+  if(id==='calc')calc();
+  $('#appwin').classList.add('open');tick();
+}
+document.addEventListener('click',e=>{const a=e.target.closest('.app');if(a)openApp(a.dataset.id)});
+$('#hb').onclick=()=>{$('#appwin').classList.remove('open')};
+
+// calculadora
+function calc(){
+  const keys=['AC','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','='];
+  let cur='0',prev=null,op=null,fresh=false;
+  $('#ck').innerHTML=keys.map(k=>`<button class="${'÷×−+='.includes(k)?'o':'AC±%'.includes(k)&&k.length<=2&&'AC±%'.split('').concat('AC').includes(k)?'f':''} ${k==='0'?'z':''}">${k}</button>`).join('');
+  const show=()=>$('#co').textContent=cur.length>9?(+cur).toExponential(3):cur;
+  const run=()=>{const a=+prev,b=+cur;return String({'+':a+b,'−':a-b,'×':a*b,'÷':b?a/b:'Erro'}[op]).slice(0,12)};
+  $('#ck').onclick=e=>{const k=e.target.textContent;if(e.target.tagName!=='BUTTON')return;
+    if(/\d/.test(k)){cur=(cur==='0'||fresh)?k:cur+k;fresh=false}
+    else if(k==='.'){if(!cur.includes('.'))cur+='.'}
+    else if(k==='AC'){cur='0';prev=op=null}
+    else if(k==='±')cur=String(-cur);
+    else if(k==='%')cur=String(+cur/100);
+    else if(k==='='){if(op){cur=run();op=prev=null;fresh=true}}
+    else{if(op&&!fresh)cur=run();prev=cur;op=k;fresh=true}
+    show()};
+}
+try{if(load('dark')==='1')document.body.classList.add('dark')}catch(e){}
+
+// escala para caber na janela
+function fit(){const s=Math.min(1,(innerHeight-30)/(852+24));$('#frame').style.transform=`scale(${s})`;$('#frame').style.marginBottom=`${-(852+24)*(1-s)}px`}
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
