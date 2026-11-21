@@ -13,6 +13,7 @@ body{min-height:100vh;display:grid;place-items:center;background:#0b0b10;font-fa
 body.dark .screen{background:linear-gradient(160deg,#0f0c29,#302b63 55%,#24243e)}
 .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
 .status{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:6px 34px 0;font-weight:600;font-size:16px;z-index:40}
+.status.dk{color:#000}.status.dk .bat{border-color:#0006}.status.dk .bat i{background:#000}.status.dk svg{fill:#000}
 .status .r{display:flex;gap:6px;align-items:center}
 .bat{width:26px;height:12px;border:1.5px solid #fff9;border-radius:4px;padding:1px;position:relative}
 .bat i{display:block;height:100%;width:75%;background:#fff;border-radius:2px}
@@ -122,6 +123,7 @@ const titles=Object.fromEntries([...apps,...dock].map(a=>[a.id,a.n]));
 function render(id){
   if(id==='calc')return `<div class="calc" style="margin-top:-0px"><div class="out" id="co">0</div><div class="keys" id="ck"></div></div>`;
   const head=`<div class="bar">${titles[id]}</div>`;
+  if(id==='web')return `<div style="height:100%;display:flex;flex-direction:column"><div style="padding:54px 12px 8px;display:flex;gap:8px"><input id="url" placeholder="Pesquisar ou digitar endereço" style="flex:1;height:38px;border:0;border-radius:12px;background:#e3e3e8;padding:0 12px;font-size:15px;outline:0;user-select:text"><button id="go" style="border:0;border-radius:12px;background:#0a84ff;color:#fff;padding:0 14px;font-size:15px">Ir</button></div><div id="sf" style="flex:1;overflow:auto;padding:10px 16px 90px"></div></div>`;
   if(id==='note')return head+`<div class="body"><textarea id="nt" placeholder="Escreva aqui...">${load('note')||''}</textarea></div>`;
   if(id==='clock')return head+`<div class="body"><div class="big" id="bigclock"></div></div>`;
   if(id==='gear')return head+`<div class="body"><div class="row"><span>Modo escuro</span><div class="tg ${document.body.classList.contains('dark')?'on':''}" id="tgd"></div></div></div>`;
@@ -133,10 +135,28 @@ function openApp(id){
   if(id==='note')$('#nt').oninput=e=>save('note',e.target.value);
   if(id==='gear')$('#tgd').onclick=e=>{document.body.classList.toggle('dark');e.target.classList.toggle('on');save('dark',document.body.classList.contains('dark')?'1':'0')};
   if(id==='calc')calc();
+  if(id==='web')safari();
   $('#appwin').classList.add('open');tick();
+  document.querySelector('.status').classList.toggle('dk',id!=='calc'&&!document.body.classList.contains('dark'));
 }
 document.addEventListener('click',e=>{const a=e.target.closest('.app');if(a)openApp(a.dataset.id)});
-$('#hb').onclick=()=>{$('#appwin').classList.remove('open')};
+$('#hb').onclick=()=>{$('#appwin').classList.remove('open');document.querySelector('.status').classList.remove('dk')};
+
+// Safari
+function safari(){
+  const favs=[['Wikipedia','https://pt.wikipedia.org','#555'],['OpenStreetMap','https://www.openstreetmap.org','#34c759'],['Wikimedia','https://commons.wikimedia.org','#0a84ff'],['Example','https://example.com','#ff9f0a']];
+  const sf=$('#sf');
+  const home=()=>{sf.innerHTML=`<div style="font-size:22px;font-weight:700;margin:6px 0 14px">Favoritos</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">`+favs.map(f=>`<div class="fv" data-u="${f[1]}" style="text-align:center;cursor:pointer"><div style="width:62px;height:62px;border-radius:15px;background:${f[2]};margin:0 auto 5px;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700">${f[0][0]}</div><span style="font-size:11px">${f[0]}</span></div>`).join('')+`</div><p style="margin-top:24px;font-size:12px;opacity:.6">Muitos sites bloqueiam abrir dentro de outra página. Se a página ficar em branco, use "Abrir em nova aba".</p>`;
+    sf.querySelectorAll('.fv').forEach(e=>e.onclick=()=>go(e.dataset.u))};
+  const go=q=>{q=(q||'').trim();if(!q)return;
+    const u=/^https?:\/\//.test(q)?q:(/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(q)?'https://'+q:'https://pt.wikipedia.org/w/index.php?search='+encodeURIComponent(q));
+    $('#url').value=u;
+    sf.style.padding='0';
+    sf.innerHTML=`<iframe src="${u}" style="width:100%;height:calc(100% - 4px);border:0;background:#fff" referrerpolicy="no-referrer"></iframe><a href="${u}" target="_blank" rel="noopener" style="position:absolute;bottom:34px;left:50%;transform:translateX(-50%);background:#0a84ff;color:#fff;padding:8px 14px;border-radius:16px;font-size:13px;text-decoration:none">Abrir em nova aba</a>`};
+  $('#go').onclick=()=>go($('#url').value);
+  $('#url').onkeydown=e=>{if(e.key==='Enter')go(e.target.value)};
+  home();
+}
 
 // calculadora
 function calc(){
